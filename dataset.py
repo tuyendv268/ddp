@@ -123,7 +123,7 @@ class QA_Dataset(Dataset):
         query = sample["query"]
         
         contexts = []
-        positive_index, count = None, 0
+        positive_index, count = 0, 0
         for index, context in enumerate(sample["passages"]):
             if context["is_selected"] == 1:
                 if count == 1:

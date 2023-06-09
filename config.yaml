@@ -1,5 +1,5 @@
 general:
-  batch_size: 2
+  batch_size: 4
   device: cpu
   mode: train
   epoch: 2
@@ -11,7 +11,7 @@ general:
   n_worker: 0
   save_ckpt_per_n_epoch: 1 
   # envibert
-  plm: envibert
+  plm: xlmr
   accumulation_steps: 2
 
 path: 

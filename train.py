@@ -67,20 +67,13 @@ def init_model_and_tokenizer(config):
             'nguyenvulebinh/vi-mrc-base', cache_dir=config.path.pretrained_dir, use_auth_token=AUTH_TOKEN)
         plm = AutoModel.from_pretrained(
             "nguyenvulebinh/vi-mrc-base", cache_dir=config.path.pretrained_dir, use_auth_token=AUTH_TOKEN)
-
-    if config.general.model_type == "cross":
-        model = Cross_Model(
-            max_length=config.general.max_length, 
-            batch_size=config.general.batch_size,
-            device=config.general.device,
-            tokenizer=tokenizer, model=plm).to(device)
-    elif config.general.model_type == "dual":
-        model = Dual_Model(
-            max_length=config.general.max_length, 
-            batch_size=config.general.batch_size, 
-            device=config.general.device,
-            tokenizer=tokenizer, model=plm).to(device)
-
+    
+    model = Cross_Model(
+        max_length=config.general.max_length, 
+        batch_size=config.general.batch_size,
+        device=config.general.device,
+        tokenizer=tokenizer, model=plm).to(device)
+    
     if os.path.exists(config.path.warm_up):
         model.load_state_dict(torch.load(config.path.warm_up, map_location="cpu"))
         print(f"load model state dict from {config.path.warm_up}")

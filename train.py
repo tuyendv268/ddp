@@ -25,7 +25,6 @@ from dataset import (
 
 from torchmetrics.functional import pairwise_cosine_similarity
 from model import Cross_Model
-from loss import QA_Loss
 from datetime import datetime
 from transformers import AutoTokenizer
 from transformers import AutoModel, AutoConfig

@@ -111,6 +111,20 @@ class QA_Dataset(Dataset):
         query = self.tokenizer(
             normed_query, max_length=self.max_length, truncation=True)["input_ids"]
         
+        if self.mode == "train":
+            num_mask = 4 if len(query) > 16 else 2
+            for _ in range(num_mask):
+                mask_idx = random.randint(1, len(query) - 1)
+                query[mask_idx] = self.tokenizer.mask_token_id
+            
+            # print(self.tokenizer.decode(query))
+            for index in range(len(contexts)):
+                num_mask = 12 if len(contexts[index]) > 96 else 6
+                for _ in range(num_mask):
+                    mask_idx = random.randint(1, len(contexts[index]) - 1)
+                    contexts[index][mask_idx] = self.tokenizer.mask_token_id
+                    # print(self.tokenizer.decode(contexts[index]))
+        
         return {
             "positive_index": positive_index,
             "contexts":contexts,

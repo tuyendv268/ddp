@@ -26,7 +26,7 @@ def optimizer_scheduler(model, num_train_steps):
             },
         ]
 
-    opt = AdamW(optimizer_parameters, lr=5e-4, no_deprecation_warning=True)
+    opt = AdamW(optimizer_parameters, lr=4e-5, no_deprecation_warning=True)
     sch = get_linear_schedule_with_warmup(
         opt,
         num_warmup_steps=int(0.05*num_train_steps),

@@ -240,11 +240,11 @@ def train(config):
             if (step + 1) % config.general.accumulation_steps == 0:
                 scaler.step(optimizer)
                 optimizer.zero_grad()
-                                
+                scheduler.step()
                 scaler.update()
             step += 1
             
-            bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank(), lr=optimizer.param_groups[0]['lr'])
+            bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank(), lr=scheduler.get_last_lr())
             
         if is_main_process():
             if (epoch + 1) % config.general.save_ckpt_per_n_epoch == 0:

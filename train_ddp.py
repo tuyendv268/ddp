@@ -198,7 +198,7 @@ def train(config):
     model = model.cuda()
     
     local_rank = int(os.environ['LOCAL_RANK'])
-    model = nn.parallel.DistributedDataParallel(model, device_ids=[local_rank])
+    model = nn.parallel.DistributedDataParallel(model, device_ids=[local_rank], find_unused_parameters=True)
 
     train_loader, valid_loader, test_loader = prepare_dataloader(config=config, tokenizer=tokenizer)
 

@@ -159,7 +159,7 @@ def prepare_dataloader(config, tokenizer):
         train_dataset, batch_size=config.general.batch_size,
         collate_fn=collate_fn,
         sampler=sampler,
-        num_workers=config.general.n_worker, shuffle=True, pin_memory=True, drop_last=True)
+        num_workers=config.general.n_worker, pin_memory=True, drop_last=True)
     
     
     valid_dataset = QA_Dataset(
@@ -172,7 +172,7 @@ def prepare_dataloader(config, tokenizer):
         valid_dataset, batch_size=config.general.batch_size, 
         sampler=sampler,
         collate_fn=collate_fn,
-        num_workers=config.general.n_worker, shuffle=False, pin_memory=True)
+        num_workers=config.general.n_worker, pin_memory=True)
     
     test_dataset = QA_Dataset(
         test_data, mode="val",
@@ -184,7 +184,7 @@ def prepare_dataloader(config, tokenizer):
         test_dataset, batch_size=config.general.batch_size,
         sampler=sampler, 
         collate_fn=collate_fn, 
-        num_workers=config.general.n_worker, shuffle=False, pin_memory=True, drop_last=False)
+        num_workers=config.general.n_worker, pin_memory=True, drop_last=False)
     
     return train_loader, valid_loader, test_loader
         

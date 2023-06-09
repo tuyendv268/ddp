@@ -204,7 +204,8 @@ def train(config):
 
     num_train_steps = len(train_loader) * config.general.epoch
     optimizer, scheduler = optimizer_scheduler(model, num_train_steps)
-    
+    scaler = torch.cuda.amp.GradScaler(enabled=True)
+
     step = 0
     for epoch in range(config.general.epoch):
         model.train()
@@ -216,11 +217,15 @@ def train(config):
             inputs_ids = data["inputs_ids"].cuda()
             masks = data["masks"].cuda()
             labels = data["labels"].cuda()
-                        
-            logits, loss = model(
-                ids=inputs_ids, 
-                masks=masks, 
-                labels=labels)
+            
+            with torch.cuda.amp.autocast(dtype=torch.float16):
+                logits, loss = model(
+                    ids=inputs_ids, 
+                    masks=masks, 
+                    labels=labels)
+                
+                loss /= config.general.accumulation_steps
+            scaler.scale(loss).backward()
             
             if is_main_process():
                 y_pred = torch.softmax(logits, dim=0).squeeze(1)
@@ -231,16 +236,15 @@ def train(config):
             
             train_losses.append(loss.item())
             
-            loss /= config.general.accumulation_steps
-            loss.backward()
 
             if (step + 1) % config.general.accumulation_steps == 0:
-                optimizer.step()
+                scaler.step(optimizer)
                 optimizer.zero_grad()
-                scheduler.step()
+                                
+                scaler.update()
             step += 1
             
-            bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank())
+            bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank(), lr=optimizer.param_groups[0]['lr'])
             
         if is_main_process():
             if (epoch + 1) % config.general.save_ckpt_per_n_epoch == 0:

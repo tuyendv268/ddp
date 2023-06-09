@@ -16,13 +16,12 @@ class Cross_Model(nn.Module):
         super(Cross_Model, self).__init__()
         self.max_length = max_length
         self.batch_size = batch_size
-        self.device = device
         
         self.model = model
         self.tokenizer = tokenizer
         
         self.dropout = nn.Dropout(droprate)
-        self.fc = nn.Linear(768, 1).to(self.device)
+        self.fc = nn.Linear(768, 1)
         self.cre = torch.nn.CrossEntropyLoss()
 
     def forward(self, ids, masks, labels=None):

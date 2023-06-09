@@ -191,8 +191,8 @@ def prepare_dataloader(config, tokenizer):
 
 def train(config):    
     init_distributed()
-    
-    writer = init_directories_and_logger(config)        
+    if is_main_process():
+        writer = init_directories_and_logger(config)        
     model, tokenizer = init_model_and_tokenizer(config)
     
     model = model.cuda()

@@ -4,8 +4,19 @@ import re
 from transformers import AdamW, get_linear_schedule_with_warmup
 import pandas as pd
 from pandarallel import pandarallel
+from underthesea import word_tokenize
 from glob import glob
 import json
+
+def load_stopwords(path):
+    with open(path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+        lines = [line.strip() for line in lines]
+    
+    return set(lines)
+
+path = "vietnamese-stopword.txt"
+stopwords = load_stopwords(path)
 
 def check(sample):
     count=0 
@@ -23,9 +34,15 @@ def load_file(path):
         for line in f.readlines():
             json_obj = json.loads(line.strip())
             if check(json_obj):
-                data.append(json_obj)
+                data.append(line)
             
     return data
+
+def save_data(path, data):
+    with open(path, "w", encoding="utf-8") as f:
+        for sample in data:
+            json_obj = json.dumps(sample, ensure_ascii=False)
+            f.write(json_obj+"\n")
 
 def load_data(path):
     data = []
@@ -60,10 +77,13 @@ def optimizer_scheduler(model, num_train_steps):
 def norm_text(text):
     text = text.lower()
     text = re.sub(
-        r'[^a-zaăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵ0-9\s]+', 
+        r'[^a-zaăâáắấàằầảẳẩãẵẫạặậđeêéếèềẻểẽễẹệiíìỉĩịoôơóốớòồờỏổởõỗỡọộợuưúứùừủửũữụựyýỳỷỹỵ_0-9\s]+', 
         ' ', text)
     text = re.sub("\n+", " ", text)
     text = re.sub("\s+", " ", text)
+    
+    text =  [word.replace(" ", "_") for word in word_tokenize(text) if word.lower() not in stopwords]
+    text = " ".join(text)
     return text
 
 

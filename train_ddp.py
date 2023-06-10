@@ -141,7 +141,6 @@ def prepare_dataloader(config, tokenizer):
     
     train_dataset = QA_Dataset(
         train_data, mode="train",
-        batch_size=config.general.batch_size,
         tokenizer=tokenizer, 
         max_length=config.general.max_length)
     
@@ -160,7 +159,6 @@ def prepare_dataloader(config, tokenizer):
     
     valid_dataset = QA_Dataset(
         val_data, mode="val",
-        batch_size=config.general.batch_size,
         tokenizer=tokenizer, 
         max_length=config.general.max_length)
     sampler = DistributedSampler(dataset=valid_dataset, shuffle=False)
@@ -172,7 +170,6 @@ def prepare_dataloader(config, tokenizer):
     
     test_dataset = QA_Dataset(
         test_data, mode="val",
-        batch_size=config.general.batch_size,
         tokenizer=tokenizer, 
         max_length=config.general.max_length)
     sampler = DistributedSampler(dataset=test_dataset, shuffle=False)

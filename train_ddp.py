@@ -202,7 +202,7 @@ def train(config):
     step = 0
     for epoch in range(config.general.epoch):
         model.train()
-        train_losses, train_mrrs = [], []
+        train_losses = []
         
         train_loader.sampler.set_epoch(epoch)
         bar = tqdm(enumerate(train_loader), total=len(train_loader))
@@ -219,14 +219,6 @@ def train(config):
                 
                 loss /= config.general.accumulation_steps
             scaler.scale(loss).backward()
-            
-            if is_main_process():
-                y_pred = torch.softmax(logits, dim=0).squeeze(1)
-                y_true = labels
-                
-                pair = [[pred, label] for pred, label in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
-                train_mrrs += pair
-            
             train_losses.append(loss.item())
             
 
@@ -291,19 +283,15 @@ def train(config):
                     
                 valid_mrrs = list(map(calculate_mrr, valid_mrrs))
                 valid_mrrs = np.array(valid_mrrs).mean()
-                
-                train_mrrs = list(map(calculate_mrr, train_mrrs))
-                train_mrrs = np.array(train_mrrs).mean()
-                
+                                
                 test_mrrs = list(map(calculate_mrr, test_mrrs))
                 test_mrrs = np.array(test_mrrs).mean()
                 
-                print(f"mrr_train: {train_mrrs}, mrr_valid: {valid_mrrs} mrr_test: {test_mrrs}")
+                print(f"mrr_valid: {valid_mrrs} mrr_test: {test_mrrs}")
                 print(f"train_loss: {np.mean(np.array(train_losses))}, valid_loss: {np.mean(np.array(valid_losses))} test_losses: {np.mean(np.array(test_losses))}")
                 writer.add_scalars(
                     "mrr",
                     {
-                        "train_mrrs": train_mrrs,
                         "test_mrrs": test_mrrs,
                         "valid_mrrs":valid_mrrs},
                     global_step=step

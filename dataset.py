@@ -87,12 +87,11 @@ class Infer_Dual_Dataset(Dataset):
         }
         
 class QA_Dataset(Dataset):
-    def __init__(self, data, tokenizer, max_length=384, batch_size=32, mode="train", mask_percent=0.15):
+    def __init__(self, data, tokenizer, max_length=384, mode="train", mask_percent=0.15):
         self.data = data
         self.max_length = max_length
         self.tokenizer = tokenizer
         
-        self.batch_size = batch_size
         self.mask_percent = mask_percent
         self.mode = mode
 

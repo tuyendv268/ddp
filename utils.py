@@ -4,12 +4,34 @@ import re
 from transformers import AdamW, get_linear_schedule_with_warmup
 import pandas as pd
 from pandarallel import pandarallel
-pandarallel.initialize(nb_workers=2, progress_bar=False)
+from glob import glob
+import json
+
+def check(sample):
+    count=0 
+    for passage in sample["passages"]:
+        if passage["is_selected"] == 1:
+            count+=1
+
+    if count == 0 or count > 1:
+        return False
+    return True
+
+def load_file(path):
+    with open(path, "r", encoding="utf-8") as f:
+        data = []
+        for line in f.readlines():
+            json_obj = json.loads(line.strip())
+            if check(json_obj):
+                data.append(json_obj)
+            
+    return data
 
 def load_data(path):
-    with open(path, "r", encoding="utf-8") as f:
-        data = f.readlines()
-    
+    data = []
+    for _file in glob(path+"/*.json"):
+        data += load_file(_file)
+            
     return data
 
 def optimizer_scheduler(model, num_train_steps):

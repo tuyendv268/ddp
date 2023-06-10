@@ -239,7 +239,7 @@ def train(config):
             
             bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank(), lr=scheduler.get_last_lr())
             
-            if is_main_process() and (epoch + 1) % config.general.evaluate_per_step == 0:
+            if is_main_process() and (step + 1) % config.general.evaluate_per_step == 0:
                 torch.save(model.state_dict(), f"{config.path.ckpt}/{config.general.model_type}_{epoch}.bin")
                 
                 print("########## Start Validation ##########")

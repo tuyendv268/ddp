@@ -20,6 +20,9 @@ stopwords = load_stopwords(path)
 
 def check(sample):
     count=0 
+    if len(sample["passages"]) > 8:
+        sample["passages"] = sample["passages"][0:8]
+        
     for passage in sample["passages"]:
         if passage["is_selected"] == 1:
             count+=1

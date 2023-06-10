@@ -1,5 +1,5 @@
 general:
-  batch_size: 1
+  batch_size: 4
   device: cpu
   mode: train
   epoch: 2
@@ -8,11 +8,11 @@ general:
   valid_size: 0.05
   test_size: 0.1
   max_length: 384
-  n_worker: 0
+  n_worker: 2
   save_ckpt_per_n_epoch: 1 
   # envibert
-  plm: envibert
-  accumulation_steps: 2
+  plm: xlmr
+  accumulation_steps: 8
 
 path: 
   pretrained_dir: pretrained

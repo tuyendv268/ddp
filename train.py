@@ -109,7 +109,7 @@ def prepare_dataloader(config, tokenizer):
     valid_loader = DataLoader(
         valid_dataset, batch_size=config.general.batch_size, 
         collate_fn=collate_fn,
-        num_workers=config.general.n_worker, shuffle=False, pin_memory=True)
+        num_workers=0, shuffle=False, pin_memory=True)
     
     test_dataset = QA_Dataset(
         test_data, mode="val",
@@ -119,7 +119,7 @@ def prepare_dataloader(config, tokenizer):
     test_loader = DataLoader(
         test_dataset, batch_size=config.general.batch_size, 
         collate_fn=collate_fn, 
-        num_workers=config.general.n_worker, shuffle=False, pin_memory=True, drop_last=False)
+        num_workers=0, shuffle=False, pin_memory=True, drop_last=False)
     
     return train_loader, valid_loader, test_loader
         
@@ -142,7 +142,6 @@ def train(config):
             inputs_ids = data["inputs_ids"].to(device)
             masks = data["masks"].to(device)
             labels = data["labels"].to(device)
-                        
             logits, loss = model(
                 ids=inputs_ids, 
                 masks=masks, 

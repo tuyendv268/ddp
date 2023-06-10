@@ -54,9 +54,6 @@ def is_main_process():
     return get_rank() == 0
 
 def setup_for_distributed(is_master):
-    """
-    This function disables printing when not in master process
-    """
     import builtins as __builtin__
     builtin_print = __builtin__.print
 
@@ -82,7 +79,6 @@ def init_distributed():
             rank=rank)
 
     torch.cuda.set_device(local_rank)
-    # synchronizes all the threads to reach this point before moving on
     dist.barrier()
     setup_for_distributed(rank == 0)
 
@@ -172,7 +168,7 @@ def prepare_dataloader(config, tokenizer):
         valid_dataset, batch_size=config.general.batch_size, 
         sampler=sampler,
         collate_fn=collate_fn,
-        num_workers=config.general.n_worker, pin_memory=True)
+        num_workers=0, pin_memory=True)
     
     test_dataset = QA_Dataset(
         test_data, mode="val",
@@ -184,7 +180,7 @@ def prepare_dataloader(config, tokenizer):
         test_dataset, batch_size=config.general.batch_size,
         sampler=sampler, 
         collate_fn=collate_fn, 
-        num_workers=config.general.n_worker, pin_memory=True, drop_last=False)
+        num_workers=0, pin_memory=True, drop_last=False)
     
     return train_loader, valid_loader, test_loader
         

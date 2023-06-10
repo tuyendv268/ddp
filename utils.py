@@ -4,7 +4,6 @@ import re
 from transformers import AdamW, get_linear_schedule_with_warmup
 import pandas as pd
 from pandarallel import pandarallel
-from underthesea import word_tokenize
 from glob import glob
 import json
 
@@ -84,9 +83,6 @@ def norm_text(text):
         ' ', text)
     text = re.sub("\n+", " ", text)
     text = re.sub("\s+", " ", text)
-    
-    text =  [word.replace(" ", "_") for word in word_tokenize(text) if word.lower() not in stopwords]
-    text = " ".join(text)
     return text
 
 

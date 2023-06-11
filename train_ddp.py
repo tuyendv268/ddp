@@ -200,7 +200,8 @@ def train(config):
     num_train_steps = len(train_loader) * config.general.epoch
     optimizer, scheduler = optimizer_scheduler(model, num_train_steps)
     scaler = torch.cuda.amp.GradScaler(enabled=True)
-
+    
+    print("start training")
     step = 0
     for epoch in range(config.general.epoch):
         model.train()
@@ -227,21 +228,22 @@ def train(config):
             if (step + 1) % config.general.accumulation_steps == 0:
                 scaler.step(optimizer)
                 optimizer.zero_grad()
-                scheduler.step()
+                # scheduler.step()
                 scaler.update()
             step += 1
             
-            if is_main_process() and config.general.logging_per_steps % step == 0:
+            if is_main_process() and step % config.general.logging_per_steps == 0:
                 message = {
                     "loss":round(np.mean(np.array(train_losses)), 3),
                     "step":step,
                     "learning_rate":scheduler.get_last_lr(),
                     "gpu_id": get_rank()
                 }
-                print("training: ", message)
+                print("log: ", message)
             # bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank(), lr=scheduler.get_last_lr())
             
             if is_main_process() and (step + 1) % config.general.evaluate_per_step == 0:
+                print("start evaluate")
                 torch.save(model.state_dict(), f"{config.path.ckpt}/{config.general.model_type}_{epoch}.bin")
                 
                 valid_mrrs, valid_losses = [], []

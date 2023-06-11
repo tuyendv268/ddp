@@ -233,11 +233,11 @@ def train(config):
             
             if is_main_process() and config.general.logging_per_steps % step == 0:
                 message = {
-                    "loss":np.mean(np.array(train_losses)),
+                    "loss":round(np.mean(np.array(train_losses)), 3),
                     "step":step,
-                    "lr":scheduler.get_last_lr()
+                    "learning rate":scheduler.get_last_lr()
                 }
-                print("training log: ", message)
+                print("training: ", message)
             # bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank(), lr=scheduler.get_last_lr())
             
             if is_main_process() and (step + 1) % config.general.evaluate_per_step == 0:

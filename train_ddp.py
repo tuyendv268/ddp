@@ -4,7 +4,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 from omegaconf import OmegaConf
 from importlib.machinery import SourceFileLoader
 from torch.utils.tensorboard import SummaryWriter
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import numpy as np
 import json
 

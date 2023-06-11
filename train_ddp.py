@@ -196,7 +196,11 @@ def train(config):
     model = nn.parallel.DistributedDataParallel(model, device_ids=[local_rank], find_unused_parameters=True)
 
     train_loader, valid_loader, test_loader = prepare_dataloader(config=config, tokenizer=tokenizer)
-
+    print("num_train_sample: ", len(train_loader))
+    print("num_valid_sample: ", len(valid_loader))
+    print("num_test_sample: ", len(test_loader))
+    
+    total = len(train_loader)
     num_train_steps = len(train_loader) * config.general.epoch
     optimizer, scheduler = optimizer_scheduler(model, num_train_steps)
     scaler = torch.cuda.amp.GradScaler(enabled=True)
@@ -237,7 +241,8 @@ def train(config):
                     "loss":round(np.mean(np.array(train_losses)), 3),
                     "step":step,
                     "learning_rate":scheduler.get_last_lr(),
-                    "gpu_id": get_rank()
+                    "gpu_id": get_rank(),
+                    "total":total,
                 }
                 print("log: ", message)
             # bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank(), lr=scheduler.get_last_lr())

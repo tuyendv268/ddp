@@ -207,8 +207,8 @@ def train(config):
         train_losses = []
         
         train_loader.sampler.set_epoch(epoch)
-        bar = tqdm(enumerate(train_loader), total=len(train_loader), position=get_rank())
-        for _, data in bar:
+        # bar = tqdm(enumerate(train_loader), total=len(train_loader), position=get_rank())
+        for _, data in enumerate(train_loader):
             inputs_ids = data["inputs_ids"].cuda()
             masks = data["masks"].cuda()
             labels = data["labels"].cuda()
@@ -231,7 +231,14 @@ def train(config):
                 scaler.update()
             step += 1
             
-            bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank(), lr=scheduler.get_last_lr())
+            if is_main_process() and config.general.logging_per_steps % step == 0:
+                message = {
+                    "loss":np.mean(np.array(train_losses)),
+                    "step":step,
+                    "lr":scheduler.get_last_lr()
+                }
+                print("training log: ", message)
+            # bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank(), lr=scheduler.get_last_lr())
             
             if is_main_process() and (step + 1) % config.general.evaluate_per_step == 0:
                 torch.save(model.state_dict(), f"{config.path.ckpt}/{config.general.model_type}_{epoch}.bin")

@@ -239,8 +239,8 @@ def train(config):
 
                 with torch.no_grad():
                     model.eval()
-                    bar = tqdm(enumerate(valid_loader), total=len(valid_loader), position=1)
-                    for _, data in bar:
+                    val_bar = tqdm(enumerate(valid_loader), total=len(valid_loader), position=1)
+                    for _, data in val_bar:
                         inputs_ids = data["inputs_ids"].cuda()
                         masks = data["masks"].cuda()
                         labels = data["labels"].cuda()
@@ -256,14 +256,14 @@ def train(config):
                         valid_mrrs += pair  
                         valid_losses.append(loss.item())
                         
-                        bar.set_postfix(loss=loss.item(), epoch=epoch)
+                        val_bar.set_postfix(loss=loss.item(), epoch=epoch)
                         
                 print("######## Start Testing #########")
                 with torch.no_grad():
                     test_mrrs, test_losses = [], []
                     model.eval()
-                    bar = tqdm(enumerate(test_loader), total=len(test_loader), position=2)
-                    for _, data in bar:
+                    test_bar = tqdm(enumerate(test_loader), total=len(test_loader), position=2)
+                    for _, data in test_bar:
                         inputs_ids = data["inputs_ids"].cuda()
                         masks = data["masks"].cuda()
                         labels = data["labels"].cuda()
@@ -279,7 +279,7 @@ def train(config):
                         pair = [[pred, label] for pred, label in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
                         test_mrrs += pair
                         test_losses.append(loss.item())
-                        bar.set_postfix(loss=loss.item(), epoch=epoch)
+                        test_bar.set_postfix(loss=loss.item(), epoch=epoch)
                     
                 valid_mrrs = list(map(calculate_mrr, valid_mrrs))
                 valid_mrrs = np.array(valid_mrrs).mean()

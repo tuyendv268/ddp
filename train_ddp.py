@@ -207,7 +207,7 @@ def train(config):
         train_losses = []
         
         train_loader.sampler.set_epoch(epoch)
-        bar = tqdm(enumerate(train_loader), total=len(train_loader), position=0)
+        bar = tqdm(enumerate(train_loader), total=len(train_loader), position=get_rank())
         for _, data in bar:
             inputs_ids = data["inputs_ids"].cuda()
             masks = data["masks"].cuda()
@@ -232,7 +232,6 @@ def train(config):
             step += 1
             
             bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank(), lr=scheduler.get_last_lr())
-            bar.update()
             
             if is_main_process() and (step + 1) % config.general.evaluate_per_step == 0:
                 torch.save(model.state_dict(), f"{config.path.ckpt}/{config.general.model_type}_{epoch}.bin")
@@ -242,8 +241,8 @@ def train(config):
 
                 with torch.no_grad():
                     model.eval()
-                    val_bar = tqdm(enumerate(valid_loader), total=len(valid_loader), position=1)
-                    for _, data in val_bar:
+                    # val_bar = tqdm(enumerate(valid_loader), total=len(valid_loader), position=1)
+                    for _, data in enumerate(valid_loader):
                         inputs_ids = data["inputs_ids"].cuda()
                         masks = data["masks"].cuda()
                         labels = data["labels"].cuda()
@@ -259,14 +258,14 @@ def train(config):
                         valid_mrrs += pair  
                         valid_losses.append(loss.item())
                         
-                        val_bar.set_postfix(loss=loss.item(), epoch=epoch)
+                        # val_bar.set_postfix(loss=loss.item(), epoch=epoch)
                         
                 print("######## Start Testing #########")
                 with torch.no_grad():
                     test_mrrs, test_losses = [], []
                     model.eval()
-                    test_bar = tqdm(enumerate(test_loader), total=len(test_loader), position=2)
-                    for _, data in test_bar:
+                    # test_bar = tqdm(enumerate(test_loader), total=len(test_loader), position=2)
+                    for _, data in enumerate(test_loader):
                         inputs_ids = data["inputs_ids"].cuda()
                         masks = data["masks"].cuda()
                         labels = data["labels"].cuda()
@@ -282,7 +281,7 @@ def train(config):
                         pair = [[pred, label] for pred, label in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
                         test_mrrs += pair
                         test_losses.append(loss.item())
-                        test_bar.set_postfix(loss=loss.item(), epoch=epoch)
+                        # test_bar.set_postfix(loss=loss.item(), epoch=epoch)
                     
                 valid_mrrs = list(map(calculate_mrr, valid_mrrs))
                 valid_mrrs = np.array(valid_mrrs).mean()

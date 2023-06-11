@@ -244,7 +244,6 @@ def train(config):
             if is_main_process() and (step + 1) % config.general.evaluate_per_step == 0:
                 torch.save(model.state_dict(), f"{config.path.ckpt}/{config.general.model_type}_{epoch}.bin")
                 
-                print("########## Start Validation ##########")
                 valid_mrrs, valid_losses = [], []
 
                 with torch.no_grad():
@@ -268,7 +267,6 @@ def train(config):
                         
                         # val_bar.set_postfix(loss=loss.item(), epoch=epoch)
                         
-                print("######## Start Testing #########")
                 with torch.no_grad():
                     test_mrrs, test_losses = [], []
                     model.eval()

@@ -51,7 +51,7 @@ def load_data(path):
     for _file in glob(path+"/*.json"):
         data += load_file(_file)
       
-    return data[0:1024]
+    return data
 
 def optimizer_scheduler(model, num_train_steps):
     param_optimizer = list(model.named_parameters())

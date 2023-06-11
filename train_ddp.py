@@ -232,7 +232,7 @@ def train(config):
             if (step + 1) % config.general.accumulation_steps == 0:
                 scaler.step(optimizer)
                 optimizer.zero_grad()
-                # scheduler.step()
+                scheduler.step()
                 scaler.update()
             step += 1
             

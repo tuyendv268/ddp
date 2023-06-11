@@ -2,7 +2,7 @@ import os
 from omegaconf import OmegaConf
 from importlib.machinery import SourceFileLoader
 from torch.utils.tensorboard import SummaryWriter
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 import numpy as np
 import json
 
@@ -205,7 +205,7 @@ def train(config):
         train_losses = []
         
         train_loader.sampler.set_epoch(epoch)
-        bar = tqdm(enumerate(train_loader), total=len(train_loader))
+        bar = tqdm(enumerate(train_loader), total=len(train_loader), position=0)
         for _, data in bar:
             inputs_ids = data["inputs_ids"].cuda()
             masks = data["masks"].cuda()
@@ -239,7 +239,7 @@ def train(config):
 
                 with torch.no_grad():
                     model.eval()
-                    bar = tqdm(enumerate(valid_loader), total=len(valid_loader))
+                    bar = tqdm(enumerate(valid_loader), total=len(valid_loader), position=1)
                     for _, data in bar:
                         inputs_ids = data["inputs_ids"].cuda()
                         masks = data["masks"].cuda()
@@ -262,7 +262,7 @@ def train(config):
                 with torch.no_grad():
                     test_mrrs, test_losses = [], []
                     model.eval()
-                    bar = tqdm(enumerate(test_loader), total=len(test_loader))
+                    bar = tqdm(enumerate(test_loader), total=len(test_loader), position=2)
                     for _, data in bar:
                         inputs_ids = data["inputs_ids"].cuda()
                         masks = data["masks"].cuda()

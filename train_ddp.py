@@ -235,7 +235,8 @@ def train(config):
                 message = {
                     "loss":round(np.mean(np.array(train_losses)), 3),
                     "step":step,
-                    "learning rate":scheduler.get_last_lr()
+                    "learning_rate":scheduler.get_last_lr(),
+                    "gpu_id": get_rank()
                 }
                 print("training: ", message)
             # bar.set_postfix(loss=loss.item(), epoch=epoch, id=get_rank(), lr=scheduler.get_last_lr())

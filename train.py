@@ -130,7 +130,7 @@ def train(config):
 
     train_loader, valid_loader, test_loader = prepare_dataloader(config=config, tokenizer=tokenizer)
 
-    num_train_steps = len(train_loader) * config.general.epoch
+    num_train_steps = int(len(train_loader) * config.general.epoch / config.general.accumulation_steps)
     optimizer, scheduler = optimizer_scheduler(model, num_train_steps)
     
     step = 0
@@ -158,7 +158,7 @@ def train(config):
                 scheduler.step()
             step += 1
             
-            bar.set_postfix(loss=loss.item(), epoch=epoch)
+            bar.set_postfix(loss=loss.item(), epoch=epoch, lr=scheduler.get_last_lr())
         if (epoch + 1) % config.general.save_ckpt_per_n_epoch == 0:
             torch.save(model.state_dict(), f"{config.path.ckpt}/{config.general.model_type}_{epoch}.bin")
         

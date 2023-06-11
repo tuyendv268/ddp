@@ -1,7 +1,8 @@
 from tqdm.auto import tqdm
 tqdm.pandas()
 import re
-from transformers import AdamW, get_linear_schedule_with_warmup
+from torch.optim import Adam 
+import torch.optim.lr_scheduler as lr_scheduler
 import pandas as pd
 from pandarallel import pandarallel
 from glob import glob
@@ -67,14 +68,9 @@ def optimizer_scheduler(model, num_train_steps):
             },
         ]
 
-    opt = AdamW(optimizer_parameters, lr=4e-5, no_deprecation_warning=True)
-    sch = get_linear_schedule_with_warmup(
-        opt,
-        num_warmup_steps=int(0.05*num_train_steps),
-        num_training_steps=num_train_steps,
-        last_epoch=-1,
-    )
-    return opt, sch
+    optimizer = Adam(optimizer_parameters, lr=4e-5, betas=(0.9, 0.999))
+    scheduler = lr_scheduler.LinearLR(optimizer, start_factor=1.0, end_factor=0.025, total_iters=num_train_steps)
+    return optimizer, scheduler
 
 def norm_text(text):
     text = text.lower()

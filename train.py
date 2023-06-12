@@ -182,7 +182,8 @@ def train(config):
                             
                     y_pred = torch.softmax(logits, dim=0).squeeze(1)
                     y_true = labels
-                    pair = [[pred, label] for pred, label in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
+                    # y_true, y_score
+                    pair = [[label, pred] for label, pred in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
                     valid_mrrs += pair  
                     valid_losses.append(loss.item())
                     
@@ -206,7 +207,7 @@ def train(config):
                     y_pred = torch.softmax(logits, dim=0).squeeze(1)
                     y_true = labels
                     
-                    pair = [[pred, label] for pred, label in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
+                    pair = [[label, pred] for label, pred in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
                     test_mrrs += pair
                     test_losses.append(loss.item())
                     bar.set_postfix(loss=loss.item(), epoch=epoch)

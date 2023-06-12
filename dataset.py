@@ -48,7 +48,7 @@ class Infer_Pairwise_Dataset(Dataset):
         return outputs
 
 class Infer_Dual_Dataset(Dataset):
-    def __init__(self, df, tokenizer, max_length=384):
+    def __init__(self, df, tokenizer, max_length=352):
         self.df = df
         self.max_length = max_length
         self.tokenizer = tokenizer

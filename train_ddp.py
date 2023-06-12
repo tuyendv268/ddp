@@ -333,5 +333,6 @@ def mrr_score(y_true, y_score):
 if __name__ == "__main__":
     path = "config.yaml"
     config = OmegaConf.load(path)
-    print(json.dumps(OmegaConf.to_container(config), indent=4, ensure_ascii=False))
+    if is_main_process():
+        print(json.dumps(OmegaConf.to_container(config), indent=4, ensure_ascii=False))
     train(config)

@@ -137,14 +137,11 @@ class QA_Dataset(Dataset):
         
         contexts = []
         positive_index, count = None, 0
-        index = 0
-        for context in sample["passages"]:
+        for index, context in enumerate(sample["passages"]):
             if context["is_selected"] == 1:
-                if count == 1:
-                    continue
                 positive_index=index
+                assert count == 0
                 count += 1
-            index += 1           
             contexts.append(context["passage_text"])
             
         return self._parse_sample(

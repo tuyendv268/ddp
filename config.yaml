@@ -1,5 +1,5 @@
 general:
-  batch_size: 4
+  batch_size: 1
   device: cpu
   mode: train
   epoch: 2
@@ -18,8 +18,8 @@ general:
 
 path: 
   pretrained_dir: pretrained
-  train_data: data/ir/test
-  test_data: data/ir/test
+  train_data: data/processed-ir-data/temp
+  test_data: data/processed-ir-data/temp
   warm_up: checkpoints/cross_1.bin
   ckpt: outputs/checkpoints
   log: outputs/logs

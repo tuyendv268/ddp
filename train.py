@@ -134,13 +134,13 @@ def train(config):
     num_train_steps = int(len(train_loader) * config.general.epoch / config.general.accumulation_steps)
     optimizer, scheduler = optimizer_scheduler(model, num_train_steps)
     
-    print("start training")
+    print("### start training")
     step = 0
     for epoch in range(config.general.epoch):
         model.train()
         train_losses = []
-        bar = tqdm(enumerate(train_loader), total=len(train_loader))
-        for _, data in bar:
+        # bar = tqdm(enumerate(train_loader), total=len(train_loader))
+        for _, data in enumerate(train_loader):
             inputs_ids = data["inputs_ids"].to(device)
             masks = data["masks"].to(device)
             labels = data["labels"].to(device)
@@ -158,84 +158,84 @@ def train(config):
                 optimizer.step()
                 optimizer.zero_grad()
                 scheduler.step()
-            step += 1
-            
-            bar.set_postfix(loss=loss.item(), epoch=epoch, lr=scheduler.get_last_lr())
-        if step % config.general.logging_per_steps == 0:
-            torch.save(model.state_dict(), f"{config.path.ckpt}/{config.general.model_type}_{epoch}.bin")
-        
-            print("start validate: ")
-            valid_mrrs, valid_losses = [], []
-
-            with torch.no_grad():
-                model.eval()
-                bar = tqdm(enumerate(valid_loader), total=len(valid_loader))
-                for _, data in bar:
-                    inputs_ids = data["inputs_ids"].to(device)
-                    masks = data["masks"].to(device)
-                    labels = data["labels"].to(device)
-                                
-                    logits, loss = model(
-                        ids=inputs_ids, 
-                        masks=masks, 
-                        labels=labels)
-                            
-                    y_pred = torch.softmax(logits, dim=0).squeeze(1)
-                    y_true = labels
-                    # y_true, y_score
-                    pair = [[label, pred] for label, pred in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
-                    valid_mrrs += pair  
-                    valid_losses.append(loss.item())
-                    
-                    bar.set_postfix(loss=loss.item(), epoch=epoch)
-                    
-            print("start testing: ")
-            with torch.no_grad():
-                test_mrrs, test_losses = [], []
-                model.eval()
-                bar = tqdm(enumerate(test_loader), total=len(test_loader))
-                for _, data in bar:
-                    inputs_ids = data["inputs_ids"].to(device)
-                    masks = data["masks"].to(device)
-                    labels = data["labels"].to(device)
-                                
-                    logits, loss = model(
-                        ids=inputs_ids, 
-                        masks=masks, 
-                        labels=labels)
-                            
-                    y_pred = torch.softmax(logits, dim=0).squeeze(1)
-                    y_true = labels
-                    
-                    pair = [[label, pred] for label, pred in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
-                    test_mrrs += pair
-                    test_losses.append(loss.item())
-                    bar.set_postfix(loss=loss.item(), epoch=epoch)
                 
-            valid_mrrs = list(map(calculate_mrr, valid_mrrs))
-            valid_mrrs = np.array(valid_mrrs).mean()
+            # bar.set_postfix(loss=loss.item(), epoch=epoch, lr=scheduler.get_last_lr())
+            if step % config.general.logging_per_steps == 0:
+                torch.save(model.state_dict(), f"{config.path.ckpt}/{config.general.model_type}_{epoch}.bin")
+            
+                print("### start validate ")
+                valid_mrrs, valid_losses = [], []
+
+                with torch.no_grad():
+                    model.eval()
+                    # bar = tqdm(enumerate(valid_loader), total=len(valid_loader))
+                    for _, data in enumerate(valid_loader):
+                        inputs_ids = data["inputs_ids"].to(device)
+                        masks = data["masks"].to(device)
+                        labels = data["labels"].to(device)
+                                    
+                        logits, loss = model(
+                            ids=inputs_ids, 
+                            masks=masks, 
+                            labels=labels)
+                                
+                        y_pred = torch.softmax(logits, dim=0).squeeze(1)
+                        y_true = labels
+                        # y_true, y_score
+                        pair = [[label, pred] for label, pred in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
+                        valid_mrrs += pair  
+                        valid_losses.append(loss.item())
+                        
+                        # bar.set_postfix(loss=loss.item(), epoch=epoch)
+                        
+                print("### start testing ")
+                with torch.no_grad():
+                    test_mrrs, test_losses = [], []
+                    model.eval()
+                    # bar = tqdm(enumerate(test_loader), total=len(test_loader))
+                    for _, data in enumerate(test_loader):
+                        inputs_ids = data["inputs_ids"].to(device)
+                        masks = data["masks"].to(device)
+                        labels = data["labels"].to(device)
+                                    
+                        logits, loss = model(
+                            ids=inputs_ids, 
+                            masks=masks, 
+                            labels=labels)
+                                
+                        y_pred = torch.softmax(logits, dim=0).squeeze(1)
+                        y_true = labels
+                        
+                        pair = [[label, pred] for label, pred in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
+                        test_mrrs += pair
+                        test_losses.append(loss.item())
+                        # bar.set_postfix(loss=loss.item(), epoch=epoch)
                     
-            test_mrrs = list(map(calculate_mrr, test_mrrs))
-            test_mrrs = np.array(test_mrrs).mean()
-            
-            print(f"mrr_valid: {valid_mrrs} mrr_test: {test_mrrs}")
-            print(f"train_loss: {np.mean(np.array(train_losses))}, valid_loss: {np.mean(np.array(valid_losses))} test_losses: {np.mean(np.array(test_losses))}")
-            writer.add_scalars(
-                "mrr",
-                {
-                    "test_mrrs": test_mrrs,
-                    "valid_mrrs":valid_mrrs},
-                global_step=step
-            )
-            
-            writer.add_scalars(
-                "loss",
-                {
-                    "train_loss": np.mean(np.array(train_losses)),
-                    "test_losses": np.mean(np.array(test_losses)),
-                    "valid_loss": np.mean(np.array(valid_losses))},
-                global_step=step
-            )
+                valid_mrrs = list(map(calculate_mrr, valid_mrrs))
+                valid_mrrs = np.array(valid_mrrs).mean()
+                        
+                test_mrrs = list(map(calculate_mrr, test_mrrs))
+                test_mrrs = np.array(test_mrrs).mean()
+                
+                print(f"mrr_valid: {valid_mrrs} mrr_test: {test_mrrs}")
+                print(f"train_loss: {np.mean(np.array(train_losses))}, valid_loss: {np.mean(np.array(valid_losses))} test_losses: {np.mean(np.array(test_losses))}")
+                writer.add_scalars(
+                    "mrr",
+                    {
+                        "test_mrrs": test_mrrs,
+                        "valid_mrrs":valid_mrrs},
+                    global_step=step
+                )
+                
+                writer.add_scalars(
+                    "loss",
+                    {
+                        "train_loss": np.mean(np.array(train_losses)),
+                        "test_losses": np.mean(np.array(test_losses)),
+                        "valid_loss": np.mean(np.array(valid_losses))},
+                    global_step=step
+                )
+            step += 1
         
 def calculate_mrr(pair):
     return mrr_score(*pair)

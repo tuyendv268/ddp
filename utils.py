@@ -5,7 +5,9 @@ from torch.optim import Adam
 import torch.optim.lr_scheduler as lr_scheduler
 import pandas as pd
 from pandarallel import pandarallel
+import pandas as pd
 from glob import glob
+import random
 import json
 
 def load_stopwords(path):
@@ -15,28 +17,39 @@ def load_stopwords(path):
     
     return set(lines)
 
-path = "vietnamese-stopword.txt"
-stopwords = load_stopwords(path)
-
-def check(sample):
-    count=0
-    if len(sample["passages"]) > 8:
-        return False
-    for passage in sample["passages"]:
-        if passage["is_selected"] == 1:
-            count+=1
-
-    if count == 0 or count > 1:
-        return False
-    return True
+# path = "vietnamese-stopword.txt"
+# stopwords = load_stopwords(path)
 
 def load_file(path):
     with open(path, "r", encoding="utf-8") as f:
         data = []
         for line in f.readlines():
             json_obj = json.loads(line.strip())
-            if check(json_obj):
-                data.append(line)
+            query = json_obj["query"]
+            passages = []
+            mark, count = 0, 0
+            
+            for passage in json_obj["passages"]:
+                if count > 7:
+                    break
+                if passage["is_selected"] == 1:
+                    if mark == 1:
+                        continue
+                    passages.append(passage)
+                    mark = 1
+                else:
+                    passages.append(passage)
+                count+=1
+                
+            random.shuffle(passages)
+                
+            if mark == 1:
+                sample = {
+                    "query":query,
+                    "passages":passages
+                }
+                sample = json.dumps(sample, ensure_ascii=False)
+                data.append(sample)
     return data
 
 def save_data(path, data):

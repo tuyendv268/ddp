@@ -20,9 +20,6 @@ stopwords = load_stopwords(path)
 
 def check(sample):
     count=0 
-    if len(sample["passages"]) > 8:
-        sample["passages"] = sample["passages"][0:8]
-        
     for passage in sample["passages"]:
         if passage["is_selected"] == 1:
             count+=1
@@ -36,6 +33,8 @@ def load_file(path):
         data = []
         for line in f.readlines():
             json_obj = json.loads(line.strip())
+            if len(json_obj["passages"]) > 8:
+                json_obj["passages"] = json_obj["passages"][0:8]
             if check(json_obj):
                 data.append(line)
             

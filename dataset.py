@@ -139,7 +139,8 @@ class QA_Dataset(Dataset):
         positive_index, count = None, 0
         for index, context in enumerate(sample["passages"]):
             if context["is_selected"] == 1:
-                assert count == 1
+                if count == 1:
+                    continue
                 positive_index=index
                 count += 1
                             

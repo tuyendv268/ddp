@@ -111,7 +111,7 @@ class QA_Dataset(Dataset):
             normed_query, max_length=self.max_length, truncation=True)["input_ids"]
         
         if self.mode == "train":
-            num_mask = 4 if len(query) > 16 else 2
+            num_mask = 2 if len(query) > 16 else 1
             for _ in range(num_mask):
                 mask_idx = random.randint(1, len(query) - 1)
                 query[mask_idx] = self.tokenizer.mask_token_id
@@ -139,8 +139,7 @@ class QA_Dataset(Dataset):
         positive_index, count = None, 0
         for index, context in enumerate(sample["passages"]):
             if context["is_selected"] == 1:
-                if count == 1:
-                    continue
+                assert count == 1
                 positive_index=index
                 count += 1
                             

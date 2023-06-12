@@ -36,7 +36,7 @@ def load_file(path):
             if len(json_obj["passages"]) > 8:
                 json_obj["passages"] = json_obj["passages"][0:8]
             if check(json_obj):
-                data.append(line)
+                data.append(json.dumps(json_obj, ensure_ascii=False))
             
     return data
 
@@ -68,7 +68,7 @@ def optimizer_scheduler(model, num_train_steps):
         ]
 
     optimizer = Adam(optimizer_parameters, lr=4e-5, betas=(0.9, 0.999))
-    scheduler = lr_scheduler.LinearLR(optimizer, start_factor=1.0, end_factor=0.025, total_iters=num_train_steps)
+    scheduler = lr_scheduler.LinearLR(optimizer, start_factor=1.0, end_factor=0.01, total_iters=num_train_steps)
     return optimizer, scheduler
 
 def norm_text(text):

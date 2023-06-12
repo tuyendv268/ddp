@@ -201,7 +201,7 @@ def train(config):
     print("num_test_sample: ", len(test_loader))
     
     total = len(train_loader)
-    num_train_steps = len(train_loader) * config.general.epoch
+    num_train_steps = int(len(train_loader) * config.general.epoch / config.general.accumulation_steps)
     optimizer, scheduler = optimizer_scheduler(model, num_train_steps)
     scaler = torch.cuda.amp.GradScaler(enabled=True)
     

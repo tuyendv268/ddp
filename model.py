@@ -18,6 +18,15 @@ class Cross_Model(nn.Module):
         self.batch_size = batch_size
         
         self.model = model
+        total_layer = len(self.model.encoder.layer)
+        num_freeze_layer = int(total_layer/2)
+        print(f"freezing {num_freeze_layer} layer")
+        modules = [self.model.embeddings, self.model.encoder.layer[:num_freeze_layer]]
+        
+        for module in modules:
+            for param in module.parameters():
+                param.requires_grad = False
+                
         self.tokenizer = tokenizer
         
         self.dropout = nn.Dropout(droprate)

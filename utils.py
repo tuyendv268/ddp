@@ -19,7 +19,7 @@ path = "vietnamese-stopword.txt"
 stopwords = load_stopwords(path)
 
 def check(sample):
-    count=0 
+    count=0
     for passage in sample["passages"]:
         if passage["is_selected"] == 1:
             count+=1

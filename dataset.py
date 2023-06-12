@@ -168,7 +168,7 @@ class QA_Dataset(Dataset):
         max_length = max([len(x) for sample in ids for x in sample])
         max_context = max([len(sample) for sample in ids])
         
-        inputs_ids, masks = [], []
+        inputs_ids, masks, context_masks = [], [], []
         for sample in ids:
             _temp_ids, _temp_masks = [], []
             for i in range(len(sample)):
@@ -182,20 +182,24 @@ class QA_Dataset(Dataset):
                 _temp_ids.append(sample[i])
                 _temp_masks.append(sample[i] != self.tokenizer.pad_token_id)
             
+            _context_masks = [1]*len(_temp_ids) + [0]*(max_context-len(_temp_ids))
             _temp_masks += [torch.zeros_like(_temp_masks[0])]*(max_context-len(_temp_masks))
             _temp_ids += [torch.zeros_like(_temp_ids[0])]*(max_context-len(_temp_ids))
             
             masks.append(torch.stack(_temp_masks, dim=0))
             inputs_ids.append(torch.stack(_temp_ids, dim=0))
+            context_masks.append(_context_masks)
             
         masks = torch.vstack(masks)
         inputs_ids = torch.vstack(inputs_ids).long()
         labels = torch.nn.functional.one_hot(labels, max_context)
+        context_masks = torch.tensor(context_masks, dtype=torch.bool)
         
         return {
             "inputs_ids": inputs_ids,
             "masks": masks,
-            "labels": labels
+            "labels": labels,
+            "context_masks": context_masks
         }
     
 if __name__ == "__main__":                

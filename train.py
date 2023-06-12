@@ -144,8 +144,11 @@ def train(config):
             inputs_ids = data["inputs_ids"].to(device)
             masks = data["masks"].to(device)
             labels = data["labels"].to(device)
+            context_masks = data["context_masks"].to(device)
+            
             logits, loss = model(
                 ids=inputs_ids, 
+                context_masks=context_masks,
                 masks=masks, 
                 labels=labels)
                             
@@ -173,12 +176,14 @@ def train(config):
                         inputs_ids = data["inputs_ids"].to(device)
                         masks = data["masks"].to(device)
                         labels = data["labels"].to(device)
-                                    
+                        context_masks = data["context_masks"].to(device)
+                        
                         logits, loss = model(
                             ids=inputs_ids, 
+                            context_masks=context_masks,
                             masks=masks, 
                             labels=labels)
-                                
+
                         y_pred = torch.softmax(logits, dim=0).squeeze(1)
                         y_true = labels
                         # y_true, y_score
@@ -197,9 +202,11 @@ def train(config):
                         inputs_ids = data["inputs_ids"].to(device)
                         masks = data["masks"].to(device)
                         labels = data["labels"].to(device)
-                                    
+                        context_masks = data["context_masks"].to(device)
+                        
                         logits, loss = model(
                             ids=inputs_ids, 
+                            context_masks=context_masks,
                             masks=masks, 
                             labels=labels)
                                 

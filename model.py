@@ -33,7 +33,7 @@ class Cross_Model(nn.Module):
         self.fc = nn.Linear(768, 1)
         self.cre = torch.nn.CrossEntropyLoss()
 
-    def forward(self, ids, masks, labels=None):
+    def forward(self, ids, masks, labels=None, context_masks=None):
         out = self.model(input_ids=ids,
                          attention_mask=masks)
         out = out.last_hidden_state[:, 0]
@@ -41,12 +41,14 @@ class Cross_Model(nn.Module):
         logits = self.fc(embedding)
         if labels is not None:
             logits = logits.reshape(labels.size(0), labels.size(1))
-            return logits, self.loss(labels=labels, logits=logits)
+            return logits, self.loss(labels=labels, logits=logits, context_masks=context_masks)
         
         return logits
     
-    def loss(self, labels, logits):
-        loss = self.cre(logits, labels.float())
+    def loss(self, labels, logits, context_masks):
+        exp = torch.exp(logits)
+        exp = torch.masked_fill(input=exp, mask=~context_masks, value=0)
+        loss = -torch.log(torch.sum(torch.mul(exp, labels)) / torch.sum(exp))
         
         return loss
     

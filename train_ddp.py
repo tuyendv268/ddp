@@ -217,10 +217,12 @@ def train(config):
             inputs_ids = data["inputs_ids"].cuda()
             masks = data["masks"].cuda()
             labels = data["labels"].cuda()
+            context_masks = data["context_masks"].cuda()
             
             with torch.cuda.amp.autocast(dtype=torch.float16):
                 logits, loss = model(
                     ids=inputs_ids, 
+                    context_masks=context_masks,
                     masks=masks, 
                     labels=labels)
                 
@@ -260,10 +262,12 @@ def train(config):
                         inputs_ids = data["inputs_ids"].cuda()
                         masks = data["masks"].cuda()
                         labels = data["labels"].cuda()
+                        context_masks = data["context_masks"].cuda()
                         
                         with torch.cuda.amp.autocast(dtype=torch.float16):
                             logits, loss = model(
                                 ids=inputs_ids, 
+                                context_masks=context_masks,
                                 masks=masks, 
                                 labels=labels)
                                 
@@ -283,13 +287,15 @@ def train(config):
                         inputs_ids = data["inputs_ids"].cuda()
                         masks = data["masks"].cuda()
                         labels = data["labels"].cuda()
+                        context_masks = data["context_masks"].cuda()
                         
                         with torch.cuda.amp.autocast(dtype=torch.float16):
                             logits, loss = model(
                                 ids=inputs_ids, 
+                                context_masks=context_masks,
                                 masks=masks, 
                                 labels=labels)
-                                
+
                         y_pred = torch.softmax(logits, dim=0).squeeze(1)
                         y_true = labels
                         

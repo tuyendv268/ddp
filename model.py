@@ -19,7 +19,7 @@ class Cross_Model(nn.Module):
         
         self.model = model
         total_layer = len(self.model.encoder.layer)
-        num_freeze_layer = int(total_layer/3)
+        num_freeze_layer = int(2*total_layer/3)
         print(f"freezing {num_freeze_layer} layer")
         modules = [self.model.embeddings, self.model.encoder.layer[:num_freeze_layer]]
         

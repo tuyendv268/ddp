@@ -295,7 +295,6 @@ def train(config):
                                 context_masks=context_masks,
                                 masks=masks, 
                                 labels=labels)
-
                         y_pred = torch.softmax(logits, dim=0).squeeze(1)
                         y_true = labels
                         

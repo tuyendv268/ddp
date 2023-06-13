@@ -20,7 +20,7 @@ def load_stopwords(path):
 # path = "vietnamese-stopword.txt"
 # stopwords = load_stopwords(path)
 
-def load_file(path):
+def load_file(path, max_context=5):
     with open(path, "r", encoding="utf-8") as f:
         data = []
         for line in f.readlines():
@@ -30,7 +30,7 @@ def load_file(path):
             mark, count = 0, 0
             
             for passage in json_obj["passages"]:
-                if count > 7:
+                if count > max_context:
                     break
                 if passage["is_selected"] == 1:
                     if mark == 1:

@@ -135,11 +135,62 @@ def init_model_and_tokenizer(config):
         
     return model, tokenizer
 
-def prepare_dataloader(config, tokenizer):
-    train_data = load_data(config.path.train_data)
-    test_data = load_data(config.path.test_data)
+# def prepare_dataloader(config, tokenizer):
+#     train_data = load_data(config.path.train_data)
+#     test_data = load_data(config.path.test_data)
     
-    train_data, val_data = train_test_split(train_data, test_size=config.general.valid_size, random_state=42)
+#     train_data, val_data = train_test_split(train_data, test_size=config.general.valid_size, random_state=42)
+    
+#     train_dataset = QA_Dataset(
+#         train_data, mode="train",
+#         tokenizer=tokenizer, 
+#         max_length=config.general.max_length)
+    
+#     if config.general.model_type =="cross" :
+#         collate_fn = train_dataset.cross_collate_fn
+#     elif config.general.model_type =="dual" :
+#         collate_fn = train_dataset.dual_collate_fn
+    
+#     sampler = DistributedSampler(dataset=train_dataset, shuffle=True)
+#     train_loader = DataLoader(
+#         train_dataset, batch_size=config.general.batch_size,
+#         collate_fn=collate_fn,
+#         sampler=sampler,
+#         num_workers=config.general.n_worker, drop_last=True)
+    
+    
+#     valid_dataset = QA_Dataset(
+#         val_data, mode="val",
+#         tokenizer=tokenizer, 
+#         max_length=config.general.max_length)
+#     sampler = DistributedSampler(dataset=valid_dataset, shuffle=False)
+#     valid_loader = DataLoader(
+#         valid_dataset, batch_size=config.general.batch_size, 
+#         sampler=sampler,
+#         collate_fn=collate_fn,
+#         num_workers=0, drop_last=False)
+    
+#     test_dataset = QA_Dataset(
+#         test_data, mode="val",
+#         tokenizer=tokenizer, 
+#         max_length=config.general.max_length)
+#     sampler = DistributedSampler(dataset=test_dataset, shuffle=False)
+#     test_loader = DataLoader(
+#         test_dataset, batch_size=config.general.batch_size,
+#         sampler=sampler, 
+#         collate_fn=collate_fn, 
+#         num_workers=0, drop_last=False)
+    
+#     return train_loader, valid_loader, test_loader
+
+
+def prepare_dataloader(config, tokenizer):
+    # train_data = load_data(config.path.train_data)
+    test_data = config.path.test_data
+    train_data = config.path.train_data
+    val_data = config.path.val_data
+    
+    # train_data, val_data = train_test_split(train_data, test_size=config.general.valid_size, random_state=42)
     
     train_dataset = QA_Dataset(
         train_data, mode="train",
@@ -150,36 +201,31 @@ def prepare_dataloader(config, tokenizer):
         collate_fn = train_dataset.cross_collate_fn
     elif config.general.model_type =="dual" :
         collate_fn = train_dataset.dual_collate_fn
-    
-    sampler = DistributedSampler(dataset=train_dataset, shuffle=True)
+        
     train_loader = DataLoader(
         train_dataset, batch_size=config.general.batch_size,
         collate_fn=collate_fn,
-        sampler=sampler,
-        num_workers=config.general.n_worker, drop_last=True)
-    
+        num_workers=config.general.n_worker, shuffle=True, pin_memory=True, drop_last=True)
     
     valid_dataset = QA_Dataset(
         val_data, mode="val",
         tokenizer=tokenizer, 
         max_length=config.general.max_length)
-    sampler = DistributedSampler(dataset=valid_dataset, shuffle=False)
+    
     valid_loader = DataLoader(
         valid_dataset, batch_size=config.general.batch_size, 
-        sampler=sampler,
         collate_fn=collate_fn,
-        num_workers=0, drop_last=False)
+        num_workers=0, shuffle=False, pin_memory=True)
     
     test_dataset = QA_Dataset(
         test_data, mode="val",
         tokenizer=tokenizer, 
         max_length=config.general.max_length)
-    sampler = DistributedSampler(dataset=test_dataset, shuffle=False)
+    
     test_loader = DataLoader(
-        test_dataset, batch_size=config.general.batch_size,
-        sampler=sampler, 
+        test_dataset, batch_size=config.general.batch_size, 
         collate_fn=collate_fn, 
-        num_workers=0, drop_last=False)
+        num_workers=0, shuffle=False, pin_memory=True, drop_last=False)
     
     return train_loader, valid_loader, test_loader
         

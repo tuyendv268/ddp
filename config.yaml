@@ -18,8 +18,10 @@ general:
 
 path: 
   pretrained_dir: pretrained
-  train_data: data/processed-ir-data/temp
-  test_data: data/processed-ir-data/temp
+  train_data: data/question_answering_data/train/data.data
+  test_data: data/question_answering_data/test/data.data
+  val_data: data/question_answering_data/val/data.data
+
   warm_up: checkpoints/cross_1.bin
   ckpt: outputs/checkpoints
   log: outputs/logs

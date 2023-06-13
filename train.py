@@ -81,10 +81,12 @@ def init_model_and_tokenizer(config):
     return model, tokenizer
 
 def prepare_dataloader(config, tokenizer):
-    train_data = load_data(config.path.train_data)
-    test_data = load_data(config.path.test_data)
+    # train_data = load_data(config.path.train_data)
+    test_data = config.path.test_data
+    train_data = config.path.train_data
+    val_data = config.path.val_data
     
-    train_data, val_data = train_test_split(train_data, test_size=config.general.valid_size, random_state=42)
+    # train_data, val_data = train_test_split(train_data, test_size=config.general.valid_size, random_state=42)
     
     train_dataset = QA_Dataset(
         train_data, mode="train",

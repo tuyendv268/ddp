@@ -231,6 +231,7 @@ def train(config):
                 scaler.scale(loss).backward()
                 train_losses.append(loss.item())
             except RuntimeError as e:
+                torch.cuda.empty_cache()
                 print("Error in training: ", e)
                 continue
             
@@ -281,6 +282,7 @@ def train(config):
                             valid_mrrs += pair  
                             valid_losses.append(loss.item())
                         except RuntimeError as e:
+                            torch.cuda.empty_cache()
                             print("Error in validation: ", e)
                             continue
                         # val_bar.set_postfix(loss=loss.item(), epoch=epoch)
@@ -309,6 +311,7 @@ def train(config):
                             test_mrrs += pair
                             test_losses.append(loss.item())
                         except RuntimeError as e:
+                            torch.cuda.empty_cache()
                             print("Error in testing: ", e)
                             continue
                         # test_bar.set_postfix(loss=loss.item(), epoch=epoch)

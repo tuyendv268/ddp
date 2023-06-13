@@ -144,6 +144,8 @@ class QA_Dataset_v1(Dataset):
                 assert count == 0
                 count += 1
             contexts.append(context["passage_text"])
+        if positive_index == None:
+            return self.__getitem__(random.randint(0, self.__len__()-1))
             
         return self._parse_sample(
             query=query,

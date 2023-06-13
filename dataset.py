@@ -253,22 +253,23 @@ class QA_Dataset(Dataset):
             sample = json.loads(self.data[index].strip())    
         except:
             sample = self.data[index]      
-        query = sample["query"]
-        
-        contexts = []
-        positive_index, count = None, 0
-        for index, context in enumerate(sample["passages"]):
-            if context["is_selected"] == 1:
-                positive_index=index
-                assert count == 0
-                count += 1
-            contexts.append(context["passage_text"])
+        finally:
+            query = sample["query"]
             
-        return self._parse_sample(
-            query=query,
-            positive_index=positive_index,
-            contexts=contexts
-        )
+            contexts = []
+            positive_index, count = None, 0
+            for index, context in enumerate(sample["passages"]):
+                if context["is_selected"] == 1:
+                    positive_index=index
+                    assert count == 0
+                    count += 1
+                contexts.append(context["passage_text"])
+                
+            return self._parse_sample(
+                query=query,
+                positive_index=positive_index,
+                contexts=contexts
+            )
         
     def cross_collate_fn(self, batch):
         ids = [

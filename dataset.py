@@ -17,7 +17,6 @@ class Infer_Pairwise_Dataset(Dataset):
         self.df = df
         self.max_length = max_length
         self.tokenizer = tokenizer
-        print(df.head())
         self.questions = tokenizer.batch_encode_plus(
             list(df["query"].values), max_length=max_length, truncation=True)[
             "input_ids"]
@@ -250,7 +249,10 @@ class QA_Dataset(Dataset):
         }
        
     def __getitem__(self, index):
-        sample = json.loads(self.data[index].strip())        
+        try:
+            sample = json.loads(self.data[index].strip())    
+        except:
+            sample = self.data[index]      
         query = sample["query"]
         
         contexts = []

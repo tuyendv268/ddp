@@ -68,7 +68,7 @@ class Cross_Model(nn.Module):
             num_workers=0, shuffle=False, pin_memory=True)
         preds = []
         with torch.no_grad():
-            bar = enumerate(valid_loader)
+            bar = tqdm(enumerate(valid_loader))
             for step, data in bar:
                 ids = data["ids"].to(self.device)
                 masks = data["masks"].to(self.device)
@@ -79,4 +79,4 @@ class Cross_Model(nn.Module):
         ranks = scores.argsort(descending=True)
         print("model score: ", preds)
         print("rank: ", ranks)
-        return scores, scores
+        return scores, ranks

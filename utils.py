@@ -38,6 +38,8 @@ def load_file(path, max_context=4):
                     passages.append(passage)
                     mark = 1
                 else:
+                    if len(passages) == max_context and mark == 0:
+                        continue
                     passages.append(passage)
                 count+=1
                 

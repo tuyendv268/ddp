@@ -16,12 +16,13 @@ class Infer_Pairwise_Dataset(Dataset):
         self.df = df
         self.max_length = max_length
         self.tokenizer = tokenizer
-        
+        print(df.head())
         self.questions = tokenizer.batch_encode_plus(
-            list(df.question.values), max_length=max_length, truncation=True)[
+            list(df["query"].values), max_length=max_length, truncation=True)[
             "input_ids"]
+        
         self.contexts = tokenizer.batch_encode_plus(
-            list(df.text.values), max_length=max_length, truncation=True)[
+            list(df["text"].values), max_length=max_length, truncation=True)[
             "input_ids"]
             
     def __len__(self):

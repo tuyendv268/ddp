@@ -4,6 +4,7 @@ import pandas as pd
 
 import torch
 import torch.nn as nn
+from utils import norm_text
 
 from dataset import (
     Infer_Pairwise_Dataset
@@ -18,6 +19,7 @@ class Cross_Model(nn.Module):
         self.batch_size = batch_size
         
         self.model = model
+        self.device = device
         total_layer = len(self.model.encoder.layer)
         num_freeze_layer = int(2*total_layer/3)
         print(f"freezing {num_freeze_layer} layer")
@@ -53,10 +55,11 @@ class Cross_Model(nn.Module):
         return loss
     
     @torch.no_grad()
-    def ranking(self, question, texts):
+    def ranking(self, query, texts):
         tmp = pd.DataFrame()
-        tmp["text"] = [" ".join(x.split()) for x in texts]
-        tmp["question"] = question
+        tmp["text"] = [norm_text(x) for x in texts]
+        tmp["query"] = norm_text(query)
+        
         valid_dataset = Infer_Pairwise_Dataset(
             tmp, self.tokenizer, self.max_length)
         
@@ -71,5 +74,9 @@ class Cross_Model(nn.Module):
                 masks = data["masks"].to(self.device)
                 preds.append(torch.sigmoid(self(ids, masks)).view(-1))
             preds = torch.concat(preds)
-            
-        return preds.cpu().numpy()
+        
+        scores = preds.cpu()
+        ranks = scores.argsort(descending=True)
+        print("model score: ", preds)
+        print("rank: ", ranks)
+        return scores, scores

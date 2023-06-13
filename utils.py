@@ -20,7 +20,7 @@ def load_stopwords(path):
 # path = "vietnamese-stopword.txt"
 # stopwords = load_stopwords(path)
 
-def load_file(path, max_context=4):
+def load_file(path, max_context=6):
     with open(path, "r", encoding="utf-8") as f:
         data = []
         for line in f.readlines():

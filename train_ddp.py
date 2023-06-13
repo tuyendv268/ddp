@@ -214,23 +214,26 @@ def train(config):
         train_loader.sampler.set_epoch(epoch)
         # bar = tqdm(enumerate(train_loader), total=len(train_loader), position=get_rank())
         for _, data in enumerate(train_loader):
-            inputs_ids = data["inputs_ids"].cuda()
-            masks = data["masks"].cuda()
-            labels = data["labels"].cuda()
-            context_masks = data["context_masks"].cuda()
-            
-            with torch.cuda.amp.autocast(dtype=torch.float16):
-                logits, loss = model(
-                    ids=inputs_ids, 
-                    context_masks=context_masks,
-                    masks=masks, 
-                    labels=labels)
+            try:
+                inputs_ids = data["inputs_ids"].cuda()
+                masks = data["masks"].cuda()
+                labels = data["labels"].cuda()
+                context_masks = data["context_masks"].cuda()
                 
-                loss /= config.general.accumulation_steps
-            scaler.scale(loss).backward()
-            train_losses.append(loss.item())
+                with torch.cuda.amp.autocast(dtype=torch.float16):
+                    logits, loss = model(
+                        ids=inputs_ids, 
+                        context_masks=context_masks,
+                        masks=masks, 
+                        labels=labels)
+                    
+                    loss /= config.general.accumulation_steps
+                scaler.scale(loss).backward()
+                train_losses.append(loss.item())
+            except RuntimeError as e:
+                print("Error in training: ", e)
+                continue
             
-
             if (step + 1) % config.general.accumulation_steps == 0:
                 scaler.step(optimizer)
                 optimizer.zero_grad()
@@ -259,24 +262,27 @@ def train(config):
                     model.eval()
                     # val_bar = tqdm(enumerate(valid_loader), total=len(valid_loader), position=1)
                     for _, data in enumerate(valid_loader):
-                        inputs_ids = data["inputs_ids"].cuda()
-                        masks = data["masks"].cuda()
-                        labels = data["labels"].cuda()
-                        context_masks = data["context_masks"].cuda()
-                        
-                        with torch.cuda.amp.autocast(dtype=torch.float16):
-                            logits, loss = model(
-                                ids=inputs_ids, 
-                                context_masks=context_masks,
-                                masks=masks, 
-                                labels=labels)
-                                
-                        y_pred = torch.softmax(logits, dim=0).squeeze(1)
-                        y_true = labels
-                        pair = [[pred, label] for pred, label in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
-                        valid_mrrs += pair  
-                        valid_losses.append(loss.item())
-                        
+                        try:
+                            inputs_ids = data["inputs_ids"].cuda()
+                            masks = data["masks"].cuda()
+                            labels = data["labels"].cuda()
+                            context_masks = data["context_masks"].cuda()
+                            
+                            with torch.cuda.amp.autocast(dtype=torch.float16):
+                                logits, loss = model(
+                                    ids=inputs_ids, 
+                                    context_masks=context_masks,
+                                    masks=masks, 
+                                    labels=labels)
+                                    
+                            y_pred = torch.softmax(logits, dim=0).squeeze(1)
+                            y_true = labels
+                            pair = [[pred, label] for pred, label in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
+                            valid_mrrs += pair  
+                            valid_losses.append(loss.item())
+                        except RuntimeError as e:
+                            print("Error in validation: ", e)
+                            continue
                         # val_bar.set_postfix(loss=loss.item(), epoch=epoch)
                         
                 with torch.no_grad():
@@ -284,23 +290,27 @@ def train(config):
                     model.eval()
                     # test_bar = tqdm(enumerate(test_loader), total=len(test_loader), position=2)
                     for _, data in enumerate(test_loader):
-                        inputs_ids = data["inputs_ids"].cuda()
-                        masks = data["masks"].cuda()
-                        labels = data["labels"].cuda()
-                        context_masks = data["context_masks"].cuda()
-                        
-                        with torch.cuda.amp.autocast(dtype=torch.float16):
-                            logits, loss = model(
-                                ids=inputs_ids, 
-                                context_masks=context_masks,
-                                masks=masks, 
-                                labels=labels)
-                        y_pred = torch.softmax(logits, dim=0).squeeze(1)
-                        y_true = labels
-                        
-                        pair = [[pred, label] for pred, label in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
-                        test_mrrs += pair
-                        test_losses.append(loss.item())
+                        try:
+                            inputs_ids = data["inputs_ids"].cuda()
+                            masks = data["masks"].cuda()
+                            labels = data["labels"].cuda()
+                            context_masks = data["context_masks"].cuda()
+                            
+                            with torch.cuda.amp.autocast(dtype=torch.float16):
+                                logits, loss = model(
+                                    ids=inputs_ids, 
+                                    context_masks=context_masks,
+                                    masks=masks, 
+                                    labels=labels)
+                            y_pred = torch.softmax(logits, dim=0).squeeze(1)
+                            y_true = labels
+                            
+                            pair = [[pred, label] for pred, label in zip(y_true.cpu().detach().numpy(), y_pred.cpu().detach().numpy())]
+                            test_mrrs += pair
+                            test_losses.append(loss.item())
+                        except RuntimeError as e:
+                            print("Error in testing: ", e)
+                            continue
                         # test_bar.set_postfix(loss=loss.item(), epoch=epoch)
                     
                 valid_mrrs = list(map(calculate_mrr, valid_mrrs))

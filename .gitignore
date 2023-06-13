@@ -4,3 +4,5 @@ outputs
 data.zip
 pretrained.zip
 __pycache__
+docs
+bm25
